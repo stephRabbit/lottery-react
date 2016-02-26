@@ -65,7 +65,7 @@
 				names: [],
 				balls: [],
 				count: null,
-				cash: 200
+				display: false
 			};
 		},
 	
@@ -89,6 +89,26 @@
 			return this.setState({ name: el.target.value });
 		},
 	
+		displayPurchase: function displayPurchase() {
+			var item;
+	
+			this.state.names.forEach(function (display) {
+				item = '<div><span>Name: ' + display.name + '</span><br><span>Number: ' + display.number + '</span></div>';
+			});
+	
+			this.refs.displayBuyer.innerHTML = item;
+		},
+	
+		disableEntry: function disableEntry() {
+			this.refs.displayBuyer.innerHTML = '';
+			this.refs.submitForm.disabled = 'disabled';
+			this.refs.enterName.disabled = 'disabled';
+		},
+	
+		showDisplay: function showDisplay(val) {
+			this.setState({ display: val });
+		},
+	
 		submitHandler: function submitHandler(el) {
 			el.preventDefault();
 	
@@ -104,9 +124,10 @@
 					number: randomNumber
 				});
 	
+				this.displayPurchase();
 				this.setState({ name: '' });
 			} else {
-				el.currentTarget.disabled = 'disabled';
+				this.refs.submitForm.disabled = 'disabled';
 				alert('Sorry contest is full.');
 			}
 		},
@@ -120,61 +141,18 @@
 					null,
 					React.createElement(
 						'form',
-						{ className: 'enterDraw' },
-						React.createElement('input', { className: 'lottoInput', name: 'username', placeholder: 'Enter your name', type: 'text', value: this.state.name, onChange: this.onChangeName }),
+						{ className: 'enterDraw', onSubmit: this.submitHandler },
+						React.createElement('input', { className: 'lottoInput', name: 'username', placeholder: 'Enter your name', ref: 'enterName', type: 'text', value: this.state.name, onChange: this.onChangeName }),
 						React.createElement(
 							'button',
-							{ className: 'button enterButton', type: 'submit', onClick: this.submitHandler },
-							React.createElement(
-								'span',
-								null,
-								'Buy a ticket!'
-							)
+							{ className: 'button enterButton', ref: 'submitForm', type: 'submit' },
+							'Buy a ticket!'
 						)
 					),
-					React.createElement(DisplayEntry, { names: this.state.names })
+					React.createElement('div', { className: 'display', ref: 'displayBuyer' })
 				),
-				React.createElement(StartDraw, { count: this.state.count, names: this.state.names })
-			);
-		}
-	});
-	
-	var DisplayEntry = React.createClass({
-		displayName: 'DisplayEntry',
-	
-		render: function render() {
-			var allNames = this.props.names;
-			var displayNames = allNames.map(function (display, index) {
-				return React.createElement(DisplayItems, { key: index, name: display.name, number: display.number });
-			});
-	
-			return React.createElement(
-				'div',
-				null,
-				displayNames
-			);
-		}
-	});
-	
-	var DisplayItems = React.createClass({
-		displayName: 'DisplayItems',
-	
-		render: function render() {
-			return React.createElement(
-				'div',
-				{ className: 'test' },
-				React.createElement(
-					'span',
-					null,
-					'Name: ',
-					this.props.name
-				),
-				React.createElement(
-					'span',
-					null,
-					'Number: ',
-					this.props.number
-				)
+				React.createElement(StartDraw, { count: this.state.count, names: this.state.names, disableEntry: this.disableEntry, showDisplay: this.showDisplay }),
+				React.createElement(DisplayWinners, { count: this.state.count, names: this.state.names, display: this.state.display })
 			);
 		}
 	});
@@ -182,8 +160,79 @@
 	var StartDraw = React.createClass({
 		displayName: 'StartDraw',
 	
+		shuffleArray: function shuffleArray(array) {
+			for (var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {}
+			return array;
+		},
+	
 		startHandler: function startHandler() {
-			if (this.props.count > 2) {}
+			if (this.props.count > 2) {
+				this.shuffleArray(this.props.names);
+				this.refs.startDraw.disabled = 'disabled';
+				this.props.showDisplay(true);
+				this.props.disableEntry();
+				alert('The draw has started!');
+			} else {
+				alert('Not enough entries... Buy a ticket!');
+			}
+		},
+	
+		render: function render() {
+			return React.createElement(
+				'div',
+				{ className: 'buttonSection' },
+				React.createElement(
+					'button',
+					{ ref: 'startDraw', className: 'button', onClick: this.startHandler },
+					'Start Draw!'
+				)
+			);
+		}
+	});
+	
+	var DisplayWinners = React.createClass({
+		displayName: 'DisplayWinners',
+	
+		displayHandler: function displayHandler() {
+	
+			if (this.props.display) {
+				var context = this,
+				    displayText = '',
+				    displayWinnings = '',
+				    winnings = null;
+	
+				this.props.names.forEach(function (display, index) {
+					winnings = (200 + context.props.names.length * 10) / 2;
+	
+					if (index < 3) {
+						context.refs.displayResult.disabled = 'disabled';
+	
+						switch (index) {
+							case 0:
+								winnings = winnings * .75;
+								displayText = '1st ball';
+								break;
+							case 1:
+								winnings = winnings * .15;
+								displayText = '2nd ball';
+								break;
+							case 2:
+								winnings = winnings * .10;
+								displayText = '3rd ball';
+								break;
+						}
+	
+						displayWinnings += '<div><div><span>' + displayText + ' <strong>( ' + display.number + ' )</strong>' + '</span><br><span>' + display.name + ': $' + Math.floor(winnings) + '</span></div></div>';
+	
+						return;
+					}
+				});
+	
+				this.refs.winners.innerHTML = displayWinnings;
+				alert('Thanks for playing!');
+			} else {
+				alert('Draw is still open!');
+			}
 		},
 	
 		render: function render() {
@@ -191,19 +240,20 @@
 				'div',
 				null,
 				React.createElement(
-					'button',
-					{ onClick: this.startHandler, disabled: true },
+					'div',
+					{ className: 'buttonSection' },
 					React.createElement(
-						'span',
-						null,
-						'Start Draw!'
+						'button',
+						{ className: 'button', ref: 'displayResult', onClick: this.displayHandler },
+						'Display Winners!'
 					)
-				)
+				),
+				React.createElement('div', { className: 'display', ref: 'winners' })
 			);
 		}
 	});
 	
-	ReactDOM.render(React.createElement(LotteryFrom, null), document.getElementById('app'));
+	ReactDOM.render(React.createElement(LotteryFrom, null), document.getElementById('lotto'));
 
 /***/ },
 /* 1 */

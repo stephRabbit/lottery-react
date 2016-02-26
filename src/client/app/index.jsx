@@ -12,7 +12,7 @@ var LotteryFrom = React.createClass({
 			names	: [],
 			balls	: [],
 			count	: null,
-			cash	: 200
+			display : false
 		}
 	},
 
@@ -37,6 +37,26 @@ var LotteryFrom = React.createClass({
 		return this.setState({name: el.target.value});
 	},
 
+	displayPurchase: function() {
+		var item;
+
+		this.state.names.forEach(function(display) {
+			item = '<div><span>Name: ' + display.name + '</span><br><span>Number: ' + display.number + '</span></div>';
+		});
+
+		this.refs.displayBuyer.innerHTML = item;
+	},
+
+	disableEntry: function() {
+		this.refs.displayBuyer.innerHTML = '';
+		this.refs.submitForm.disabled = 'disabled';
+		this.refs.enterName.disabled = 'disabled';
+	},
+
+	showDisplay: function(val) {
+		this.setState({ display: val });
+	},
+
 	submitHandler: function(el) {
 		el.preventDefault();
 
@@ -52,10 +72,11 @@ var LotteryFrom = React.createClass({
 				number: randomNumber
 			});
 
+			this.displayPurchase();
 			this.setState({name: ''});
 		}
 		else {
-			el.currentTarget.disabled = 'disabled';
+			this.refs.submitForm.disabled = 'disabled';
 			alert('Sorry contest is full.');
 		}
 	},
@@ -64,59 +85,98 @@ var LotteryFrom = React.createClass({
 		return (
 			<div className="lottoContainer">
 				<div>
-					<form className="enterDraw">
-						<input className="lottoInput" name="username" placeholder="Enter your name" type="text" value={this.state.name} onChange={this.onChangeName} />
-						<button className="button enterButton" type="submit" onClick={this.submitHandler}>
-							<span>Buy a ticket!</span>
-						</button>
+					<form className="enterDraw" onSubmit={this.submitHandler}>
+						<input className="lottoInput" name="username" placeholder="Enter your name" ref="enterName" type="text" value={this.state.name} onChange={this.onChangeName} />
+						<button className="button enterButton" ref="submitForm" type="submit">Buy a ticket!</button>
 					</form>
-					<DisplayEntry names={this.state.names} />
+					<div className="display" ref="displayBuyer"></div>
 				</div>
-				<StartDraw count={this.state.count} names={this.state.names} />
-			</div>
-		);
-	}
-});
-
-var DisplayEntry = React.createClass({
-	render: function() {
-		var allNames = this.props.names;
-		var displayNames = allNames.map(function(display, index) {
-			return <DisplayItems key={index} name={display.name} number={display.number} />
-		});
-
-		return <div>{displayNames}</div>;
-	}
-});
-
-var DisplayItems = React.createClass({
-	render: function() {
-		return (
-			<div className="test">
-				<span>Name: {this.props.name}</span>
-				<span>Number: {this.props.number}</span>
+				<StartDraw count={this.state.count} names={this.state.names} disableEntry={this.disableEntry} showDisplay={this.showDisplay} />
+				<DisplayWinners count={this.state.count} names={this.state.names} display={this.state.display} />
 			</div>
 		);
 	}
 });
 
 var StartDraw = React.createClass({
+	shuffleArray: function(array) {
+		for (var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x);
+		return array;
+	},
+
 	startHandler: function() {
 		if (this.props.count > 2) {
-
+			this.shuffleArray(this.props.names);
+			this.refs.startDraw.disabled = 'disabled';
+			this.props.showDisplay(true);
+			this.props.disableEntry();
+			alert('The draw has started!');
+		}
+		else {
+			alert('Not enough entries... Buy a ticket!');
 		}
 	},
 
 	render: function() {
 		return (
-			<div>
-				<button onClick={this.startHandler} disabled>
-					<span>Start Draw!</span>
-				</button>
+			<div className="buttonSection">
+				<button ref="startDraw" className="button" onClick={this.startHandler}>Start Draw!</button>
 			</div>
 		);
 	}
 });
 
+var DisplayWinners = React.createClass({
+	displayHandler: function() {
 
-ReactDOM.render(<LotteryFrom />, document.getElementById('app'));
+		if (!this.props.display) alert('Draw is still open!');
+=
+		var	context 		= this,
+			displayText 	= '',
+			displayWinnings = '',
+			winnings 		= null;
+
+		this.props.names.forEach(function(display, index) {
+			winnings = (200 + context.props.names.length * 10) / 2;
+
+			if (index < 3) {
+				context.refs.displayResult.disabled = 'disabled';
+
+				switch (index) {
+					case 0:
+						winnings = winnings * .75;
+						displayText = '1st ball';
+						break;
+					case 1:
+						winnings = winnings * .15;
+						displayText = '2nd ball';
+						break;
+					case 2:
+						winnings = winnings * .10;
+						displayText = '3rd ball';
+						break;
+				}
+
+				displayWinnings += '<div><div><span>' + displayText +' <strong>( ' + display.number + ' )</strong>' + '</span><br><span>' + display.name + ': $' + Math.floor(winnings) + '</span></div></div>';
+
+				return;
+			}
+		});
+
+		this.refs.winners.innerHTML = displayWinnings;
+		alert('Thanks for playing!');
+	},
+
+	render: function() {
+		return (
+			<div>
+				<div className="buttonSection">
+					<button className="button" ref="displayResult" onClick={this.displayHandler}>Display Winners!</button>
+				</div>
+				<div className="display" ref="winners"></div>
+			</div>
+		);
+	}
+});
+
+ReactDOM.render(<LotteryFrom />, document.getElementById('lotto'));
