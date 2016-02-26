@@ -129,8 +129,8 @@ var StartDraw = React.createClass({
 var DisplayWinners = React.createClass({
 	displayHandler: function() {
 
-		if (!this.props.display) alert('Draw is still open!');
-=
+		if (!this.props.display) return alert('Draw is still open!');
+
 		var	context 		= this,
 			displayText 	= '',
 			displayWinnings = '',

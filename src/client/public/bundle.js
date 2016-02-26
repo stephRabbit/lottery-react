@@ -195,44 +195,42 @@
 	
 		displayHandler: function displayHandler() {
 	
-			if (this.props.display) {
-				var context = this,
-				    displayText = '',
-				    displayWinnings = '',
-				    winnings = null;
+			if (!this.props.display) return alert('Draw is still open!');
 	
-				this.props.names.forEach(function (display, index) {
-					winnings = (200 + context.props.names.length * 10) / 2;
+			var context = this,
+			    displayText = '',
+			    displayWinnings = '',
+			    winnings = null;
 	
-					if (index < 3) {
-						context.refs.displayResult.disabled = 'disabled';
+			this.props.names.forEach(function (display, index) {
+				winnings = (200 + context.props.names.length * 10) / 2;
 	
-						switch (index) {
-							case 0:
-								winnings = winnings * .75;
-								displayText = '1st ball';
-								break;
-							case 1:
-								winnings = winnings * .15;
-								displayText = '2nd ball';
-								break;
-							case 2:
-								winnings = winnings * .10;
-								displayText = '3rd ball';
-								break;
-						}
+				if (index < 3) {
+					context.refs.displayResult.disabled = 'disabled';
 	
-						displayWinnings += '<div><div><span>' + displayText + ' <strong>( ' + display.number + ' )</strong>' + '</span><br><span>' + display.name + ': $' + Math.floor(winnings) + '</span></div></div>';
-	
-						return;
+					switch (index) {
+						case 0:
+							winnings = winnings * .75;
+							displayText = '1st ball';
+							break;
+						case 1:
+							winnings = winnings * .15;
+							displayText = '2nd ball';
+							break;
+						case 2:
+							winnings = winnings * .10;
+							displayText = '3rd ball';
+							break;
 					}
-				});
 	
-				this.refs.winners.innerHTML = displayWinnings;
-				alert('Thanks for playing!');
-			} else {
-				alert('Draw is still open!');
-			}
+					displayWinnings += '<div><div><span>' + displayText + ' <strong>( ' + display.number + ' )</strong>' + '</span><br><span>' + display.name + ': $' + Math.floor(winnings) + '</span></div></div>';
+	
+					return;
+				}
+			});
+	
+			this.refs.winners.innerHTML = displayWinnings;
+			alert('Thanks for playing!');
 		},
 	
 		render: function render() {
