@@ -49,8 +49,9 @@
 
 	'use strict';
 	
-	var React = __webpack_require__(/*! react */ 1);
-	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
+	var React = __webpack_require__(/*! react */ 1),
+	    ReactDOM = __webpack_require__(/*! react-dom */ 158),
+	    Utils = __webpack_require__(/*! ./utils */ 159);
 	
 	/**
 	 * Lotto From
@@ -69,14 +70,10 @@
 			};
 		},
 	
-		isInArray: function isInArray(value, array) {
-			return array.indexOf(value) > -1;
-		},
-	
 		randomNumber: function randomNumber(array) {
 			var number = Math.floor(Math.random() * 50 + 1);
 	
-			if (!this.isInArray(number, array)) {
+			if (!Utils.isInArray(number, array)) {
 				array.push(number);
 			} else {
 				this.randomNumber(array);
@@ -106,7 +103,7 @@
 		},
 	
 		showDisplay: function showDisplay(val) {
-			this.setState({ display: val });
+			return this.setState({ display: val });
 		},
 	
 		submitHandler: function submitHandler(el) {
@@ -160,14 +157,9 @@
 	var StartDraw = React.createClass({
 		displayName: 'StartDraw',
 	
-		shuffleArray: function shuffleArray(array) {
-			for (var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {}
-			return array;
-		},
-	
 		startHandler: function startHandler() {
 			if (this.props.count > 2) {
-				this.shuffleArray(this.props.names);
+				Utils.shuffleArray(this.props.names);
 				this.refs.startDraw.disabled = 'disabled';
 				this.props.showDisplay(true);
 				this.props.disableEntry();
@@ -194,7 +186,6 @@
 		displayName: 'DisplayWinners',
 	
 		displayHandler: function displayHandler() {
-	
 			if (!this.props.display) return alert('Draw is still open!');
 	
 			var context = this,
@@ -20327,6 +20318,27 @@
 	
 	module.exports = __webpack_require__(/*! react/lib/ReactDOM */ 3);
 
+
+/***/ },
+/* 159 */
+/*!*********************************!*\
+  !*** ./src/client/app/utils.js ***!
+  \*********************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+		isInArray: function isInArray(value, array) {
+			return array.indexOf(value) > -1;
+		},
+	
+		shuffleArray: function shuffleArray(array) {
+			for (var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {}
+	
+			return array;
+		}
+	};
 
 /***/ }
 /******/ ]);

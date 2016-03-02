@@ -1,5 +1,6 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
+var React 		= require('react'),
+	ReactDOM 	= require('react-dom'),
+	Utils 		= require('./utils');
 
 /**
  * Lotto From
@@ -16,14 +17,10 @@ var LotteryFrom = React.createClass({
 		}
 	},
 
-	isInArray: function(value, array) {
-		return array.indexOf(value) > -1;
-	},
-
 	randomNumber: function(array) {
 		var number 	= Math.floor(Math.random() * 50 + 1);
 
-		if (!this.isInArray(number, array)) {
+		if (!Utils.isInArray(number, array)) {
 			array.push(number);
 		}
 		else {
@@ -54,7 +51,7 @@ var LotteryFrom = React.createClass({
 	},
 
 	showDisplay: function(val) {
-		this.setState({ display: val });
+		return this.setState({ display: val });
 	},
 
 	submitHandler: function(el) {
@@ -99,14 +96,9 @@ var LotteryFrom = React.createClass({
 });
 
 var StartDraw = React.createClass({
-	shuffleArray: function(array) {
-		for (var j, x, i = array.length; i; j = Math.floor(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x);
-		return array;
-	},
-
 	startHandler: function() {
 		if (this.props.count > 2) {
-			this.shuffleArray(this.props.names);
+			Utils.shuffleArray(this.props.names);
 			this.refs.startDraw.disabled = 'disabled';
 			this.props.showDisplay(true);
 			this.props.disableEntry();
@@ -128,7 +120,6 @@ var StartDraw = React.createClass({
 
 var DisplayWinners = React.createClass({
 	displayHandler: function() {
-
 		if (!this.props.display) return alert('Draw is still open!');
 
 		var	context 		= this,
